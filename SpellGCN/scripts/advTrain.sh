@@ -1,23 +1,40 @@
 #!/usr/bin/env bash
 
-job_name=adv_train_14_01_5
-total_epochs=2
-init_model=model
+job_name=advTrain_sighan13
+data_path=../data/sighan13
+gpu=1
+
+# You have to change this directory that you download the "BERT-Base, Chinese" before you run this code!
+goolge_bert_path=/home/zhcy/TAAD/chinese_L-12_H-768_A-12
+
+# You can download models you need to initialize SpellGCN, and change ${init_model}. 
+# init_model=../models/baseline/sighan13
+# Or use the models you finetune
+# init_model=./log_finetune/13
+
+init_model=${goolge_bert_path}/bert_model.ckpt
+
+# Whether to attack clean text on the test set
 generate_clean=True
+
+#The threshold of adversarial attack.
 train_adv_threshold=0.01
 test_adv_threshold=0.02
-gpu=0
-data_path=../data/sighan14_test
-# data_path=../data/sighan13
+
+
+# set the learning rate of adversarial training 
 adv_lr=3e-6
+# set the learning rate of finetune
 finetune_lr=6e-6
 
-timestamp=`date "+%Y-%m-%d-%H-%M-%S"`
+total_epochs=2
+
 max_seq_length=180
+batch_size=8
+
+timestamp=`date "+%Y-%m-%d-%H-%M-%S"`
 do_lower_case=true
 graph_dir="../data/gcn_graph.ty_xj/"
-batch_size=8
-bert_path=/home/zhcy/TAAD/chinese_L-12_H-768_A-12
 
 # Usage adversarial_attack <TASKNAME> <JOB_NAME> <BERT_PATH> <MODEL_PATH> <TEST_PATH> <CLEAN> <ATTACK_TRAIN> <THRESHOLD> <GPU>'
 function adversarial_attack(){
@@ -34,14 +51,14 @@ local num_epochs=1
 for i in $(seq 0 0)
 do
 
-output_dir=log_${2}/${task_name}_$i
-log_dir=log_${2}/${task_name}_$i
+output_dir=log_${2}/${task_name}
+log_dir=log_${2}/${task_name}
 
 if [ ! -d "${output_dir}" ]; then
 mkdir -p ${output_dir}
 fi
 
-echo "Start running ${task_name} attack-task_${i} log to ${output_dir}.log"
+echo "Start running ${task_name} attack-task, log to ${output_dir}.log"
 
 CUDA_VISIBLE_DEVICES=$gpu python ../adv_spellgcn.py \
 --job_name=$2 \
@@ -83,8 +100,8 @@ local keep_checkpoint_max=$6
 for i in $(seq 0 0)
 do
 
-local output_dir=log_${2}/${task_name}_$i
-local log_dir=log_${2}/${task_name}_$i
+local output_dir=log_${2}/${task_name}
+local log_dir=log_${2}/${task_name}
 
 # ! -d "dir" : if dir does not exist
 if [ ! -d "${output_dir}/src" ]; then
@@ -94,7 +111,7 @@ cp ../*py ${output_dir}/src
 fi
 
 #sleep $i
-echo "Start running ${task_name} task-${i} log to ${output_dir}.log"
+echo "Start running ${task_name} task, log to ${output_dir}.log"
 CUDA_VISIBLE_DEVICES=$gpu python ../finetune_spellgcn.py \
 --job_name=$2 \
 --task_name=${task_name} \
@@ -130,8 +147,8 @@ local model_dir=$4
 for i in $(seq 0 0)
 do
 
-output_dir=log_${2}/${task_name}_$i
-log_dir=log_${2}/${task_name}_$i
+output_dir=log_${2}/${task_name}
+log_dir=log_${2}/${task_name}
 
 if [ ! -d "${output_dir}/src" ]; then
 mkdir -p ${output_dir}/src
@@ -143,7 +160,7 @@ if [ ! -d "${log_dir}" ]; then
 mkdir -p ${log_dir}
 fi
 
-echo "Start running ${task_name} task-${i} log to ${output_dir}.log"
+echo "Start running ${task_name} task, log to ${output_dir}.log"
 CUDA_VISIBLE_DEVICES=$gpu python ../run_spellgcn.py \
 --job_name=$2 \
 --task_name=${task_name} \
@@ -169,8 +186,8 @@ wait
 
 echo "***${job_name}***"
 
-test_model init_test ${job_name} ${bert_path} ${init_model} ${data_path} ${gpu}
-adversarial_attack init_attack ${job_name} ${bert_path} ${init_model} ${data_path} ${generate_clean} False ${test_adv_threshold} ${gpu}
+test_model init_test ${job_name} ${goolge_bert_path} ${init_model} ${data_path} ${gpu}
+adversarial_attack init_attack ${job_name} ${goolge_bert_path} ${init_model} ${data_path} ${generate_clean} False ${test_adv_threshold} ${gpu}
 
 model_dir=${init_model}
 adv_samples_dir=log_${job_name}/samples
@@ -188,24 +205,24 @@ echo "***${job_name},epoch-${epoch} start!***"
 
 # generate the adversarial samples for train
 # Usage adversarial_attack <TASKNAME> <JOB_NAME> <BERT_PATH> <MODEL_PATH> <TEST_PATH> <CLEAN> <ATTACK_TRAIN> <THRESHOLD> <GPU>'
-adversarial_attack attack_${epoch} ${job_name} ${bert_path} ${model_dir} ${data_path} ${generate_clean} True ${train_adv_threshold} ${gpu}
-cp -f log_${job_name}/attack_${epoch}_0/advTotalInput.txt ${adv_samples_dir}/TrainingInputAll.txt
-cp -f log_${job_name}/attack_${epoch}_0/advTotalTruth.txt ${adv_samples_dir}/TrainingTruthAll.txt
+adversarial_attack attack_${epoch} ${job_name} ${goolge_bert_path} ${model_dir} ${data_path} ${generate_clean} True ${train_adv_threshold} ${gpu}
+cp -f log_${job_name}/attack_${epoch}/advTotalInput.txt ${adv_samples_dir}/TrainingInputAll.txt
+cp -f log_${job_name}/attack_${epoch}/advTotalTruth.txt ${adv_samples_dir}/TrainingTruthAll.txt
 
 # train 1 epoch with adversarial samples 
 # Usage finetune <TASK_NAME> <JOB_NAME> <BERT_PATH> <MODEL_PATH> <FINETUNE_PATH> <EPOCHS> <LEARNING_RATE> <GPU>'
-finetune finetune_adv_${epoch} ${job_name} ${bert_path} ${model_dir} ${adv_samples_dir} 1 ${adv_lr} ${gpu}
-model_dir=log_${job_name}/finetune_adv_${epoch}_0
+finetune finetune_adv_${epoch} ${job_name} ${goolge_bert_path} ${model_dir} ${adv_samples_dir} 1 ${adv_lr} ${gpu}
+model_dir=log_${job_name}/finetune_adv_${epoch}
 
 # train 2 epoch with original data 
-finetune finetune_clean_${epoch} ${job_name} ${bert_path} ${model_dir} ${data_path} 2 ${finetune_lr} ${gpu}
-model_dir=log_${job_name}/finetune_clean_${epoch}_0
+finetune finetune_clean_${epoch} ${job_name} ${goolge_bert_path} ${model_dir} ${data_path} 2 ${finetune_lr} ${gpu}
+model_dir=log_${job_name}/finetune_clean_${epoch}
 
 # check the performance and robustness
-test_model test_${epoch} ${job_name} ${bert_path} ${model_dir} ${data_path} ${gpu}
-adversarial_attack test_adv_gen_${epoch} ${job_name} ${bert_path} ${model_dir} ${data_path} ${generate_clean} False ${test_adv_threshold} ${gpu}
-cp -f log_${job_name}/test_adv_gen_${epoch}_0/advTotalInput.txt ${adv_samples_dir}/TestInput.txt
-cp -f log_${job_name}/test_adv_gen_${epoch}_0/advTotalTruth.txt ${adv_samples_dir}/TestTruth.txt
-test_model test_adv_${epoch} ${job_name} ${bert_path} ${model_dir} ${adv_samples_dir} ${gpu}
+test_model test_${epoch} ${job_name} ${goolge_bert_path} ${model_dir} ${data_path} ${gpu}
+adversarial_attack test_adv_gen_${epoch} ${job_name} ${goolge_bert_path} ${model_dir} ${data_path} ${generate_clean} False ${test_adv_threshold} ${gpu}
+cp -f log_${job_name}/test_adv_gen_${epoch}/advTotalInput.txt ${adv_samples_dir}/TestInput.txt
+cp -f log_${job_name}/test_adv_gen_${epoch}/advTotalTruth.txt ${adv_samples_dir}/TestTruth.txt
+test_model test_adv_${epoch} ${job_name} ${goolge_bert_path} ${model_dir} ${adv_samples_dir} ${gpu}
 wait
 done
