@@ -8,7 +8,9 @@ We propose a method, which continually identifies the weak spots of a model to g
 
 For BERT and Soft-Masked BERT:
 
-
+- python==
+- pytorch==
+- transformers==
 
 For SpellGCN, we borrow some codes from [SpellGCN](https://github.com/ACL2020SpellGCN/SpellGCN), thus our requirements are the same with their.
 
@@ -35,9 +37,27 @@ For SpellGCN, we borrow some codes from [SpellGCN](https://github.com/ACL2020Spe
 
 - **For BERT and Soft-Masked BERT:**
 
+1. Set up an virtual environment for BERT and Soft-Masked BERT(python==,torch==,transformers==) using Anaconda
 
+   ```
+   conda create -n bert python=
+   conda activate bert
+   pip install torch==
+   pip install transformers==
+   ```
 
+2. Go to the directory "scripts", set up your private parameters(like the path of initial model and data)
 
+   ```
+   cd scripts
+   vim run.sh
+   ```
+
+3. bash run.sh
+
+   ```
+   bash run.sh
+   ```
 
 - **For SpellGCN:**
 
