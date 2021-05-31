@@ -6,13 +6,13 @@ We propose a method, which continually identifies the weak spots of a model to g
 
 ## Requirements
 
-For BERT and Soft-Masked BERT:
+**For BERT and Soft-Masked BERT:**
 
 - python==3.7
 - pytorch==1.4.0
 - transformers==3.4.0
 
-For SpellGCN, we borrow some codes from [SpellGCN](https://github.com/ACL2020SpellGCN/SpellGCN), thus our requirements are the same with their.
+**For SpellGCN**, we borrow some codes from [SpellGCN](https://github.com/ACL2020SpellGCN/SpellGCN), thus our requirements are the same with their.
 
 - Tensorflow==1.13.1
 - python==2.7
@@ -82,7 +82,7 @@ For SpellGCN, we borrow some codes from [SpellGCN](https://github.com/ACL2020Spe
      bash run.sh
      ```
 
-#### 3. Or you can download the models you need and init your models from them.
+#### 3. Or you can download the models you need and initialize your models from them.
 
 - Baidu Wangpan:
 
