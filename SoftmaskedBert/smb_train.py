@@ -19,7 +19,7 @@ class Trainer():
         self.criterion_d=nn.BCELoss()
         self.criterion_c=nn.NLLLoss()
         self.device=device
-        self.confusion_set=readAllConfusionSet('save/allSim2.file')
+        self.confusion_set=readAllConfusionSet('../save/confusion.file')
 
     def train(self,train):
         self.model.train()
@@ -87,7 +87,7 @@ class Trainer():
                 loss.backward()
                 self.optim.step()
             count+=1
-
+        return total_loss
 
     def test(self,test):
         self.model.eval()
@@ -213,6 +213,29 @@ class Trainer():
         self.testSet(ad)
         return all_count,all_mod_count
 
+def setup_seed(seed):
+    # set seed for CPU
+    torch.manual_seed(seed)
+    # set seed for current GPU
+    torch.cuda.manual_seed(seed)
+    # set seed for all GPU
+    torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    # Cancel acceleration
+    torch.backends.cudnn.benchmark = False
+
+    np.random.seed(seed)
+
+def str2bool(strIn):
+    if strIn.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif strIn.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        print(strIn)
+        raise argparse.ArgumentTypeError('Unsupported value encountered.')
+
 if __name__ == "__main__":
     import time
 
@@ -304,7 +327,7 @@ if __name__ == "__main__":
             best_epoch = e + 1
             if args.do_save:
                 model_save_path = args.save_dir + '/epoch{0}.pkl'.format(e + 1)
-                trainer.save_module(model_save_path)
+                trainer.save(model_save_path)
                 print("save model done!")
             print("Time cost:", time.time() - start, "s")
             print("-" * 10)

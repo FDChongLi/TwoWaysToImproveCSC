@@ -10,19 +10,19 @@ is_pretrain=6 #train no valid,test,load
 
 mode=${is_test}
 
-save_dir=''
-log_dir=''
+save_dir='../save'
+log_dir='../log'
 gpu=0,1
 gpu_num=2
 seed=0
-epoch=2
+epoch=1
 batch_size=20
 lr=2e-5
 
 train_data_path=''
 valid_data_path=''
 test_data_path=''
-model_path=''#load path
+model_path='' #load path
 
 train_ratio=0.02
 attack_ratio=0.02
@@ -269,7 +269,7 @@ if [ ${mode} -eq ${is_test} ]; then
   test_model ${task_name} ${save_dir} ${gpu} ${gpu_num} ${model_path} ${test_data_path} ${batch_size} ${lr} ${seed} ${log_dir}
 elif [ ${mode} -eq ${is_attack} ]; then
   echo "mode:attack"
-  test_model ${task_name} ${save_dir} ${gpu} ${gpu_num} ${model_path} ${test_data_path} ${batch_size} ${lr} ${seed} ${log_dir} ${attack_ratio}
+  attack_model ${task_name} ${save_dir} ${gpu} ${gpu_num} ${model_path} ${test_data_path} ${batch_size} ${lr} ${seed} ${log_dir} ${attack_ratio}
 elif [ ${mode} -eq ${is_baseline} ]; then
   echo "mode:baseline"
   baseline_model ${task_name} ${save_dir} ${gpu} ${gpu_num} ${train_data_path} ${valid_data_path} ${epoch} ${batch_size} ${lr} ${seed} ${log_dir}

@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
 
+import sys
+sys.path.append("..")
 import torch.nn as nn
 import torch
 import numpy as np
@@ -18,7 +20,7 @@ class Trainer():
         self.tokenizer=tokenizer
         self.criterion_c=nn.NLLLoss()
         self.device=device
-        self.confusion_set = readAllConfusionSet('save/confusion.file')
+        self.confusion_set = readAllConfusionSet('../save/confusion.file')
 
     def train(self,train):
         self.model.train()
@@ -199,7 +201,8 @@ class Trainer():
                 c_loss.backward()
                 self.optim.step()
             count+=1
-        print("average modified character number:{0}".format(all_mod_count/sent_num))
+        # print("average modified character number:{0}".format(all_mod_count/sent_num))
+        return total_loss
 
 
 def setup_seed(seed):

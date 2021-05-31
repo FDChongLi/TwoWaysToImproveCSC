@@ -1,3 +1,3 @@
 from .dataset import BertDataset,construct
 from .SoftMaskedBert import SoftMaskedBert
-from .AdGen import LogitGen,readAllConfusionSet
+from .AdGen import logitGen,readAllConfusionSet

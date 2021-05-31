@@ -18,7 +18,7 @@ class Trainer():
         self.tokenizer=tokenizer
         self.criterion_c=nn.NLLLoss()
         self.device=device
-        self.confusion_set = readAllConfusionSet('save/confusion.file')
+        self.confusion_set = readAllConfusionSet('../save/confusion.file')
 
     def train(self,train):
         self.model.train()
@@ -249,7 +249,7 @@ if __name__ == "__main__":
     parser.add_argument('--do_save', type=str2bool, nargs='?', const=False)
     parser.add_argument('--save_dir', type=str, default='../save')
     parser.add_argument('--seed', type=int, default=1)
-    parser.add_argumetn('--train_ratio',type=float, default=0.0)
+    parser.add_argument('--train_ratio',type=float, default=0.0)
     parser.add_argument('--attack_ratio',type=float,default=0.0)
 
     args = parser.parse_args()
