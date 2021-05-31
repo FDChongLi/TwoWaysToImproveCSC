@@ -1,0 +1,1 @@
+This directory contains three files, corresponding to the revisions we made after checking the original datasets. The reason for most of the revisions is the phenomenon that **one simplified Chinese character may correspond to multiple traditional Chinese characters**.
