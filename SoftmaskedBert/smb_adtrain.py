@@ -1,6 +1,5 @@
-import sys
+# -*- coding: UTF-8 -*-
 
-sys.path.append("..")
 import torch.nn as nn
 import torch
 import numpy as np
